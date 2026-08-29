@@ -14,57 +14,43 @@ body {
   color: #0f172a !important;
 }
 
-/* PRO CARD DESIGN */
+/* DARK CARD + WHITE TEXT */
 .grid > div {
-  background: white !important;
-  border: 1px solid #e2e8f0 !important;
+  background: #0f172a !important;
+  border: 1px solid #1e293b !important;
   border-radius: 16px !important;
   padding: 16px !important;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.04) !important;
-  transition: all 0.2s ease !important;
-}
-.grid > div:hover {
-  transform: translateY(-3px) !important;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.08) !important;
-  border-color: #cbd5e1 !important;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15) !important;
 }
 
 .grid {
   gap: 16px !important;
 }
 
-/* FORCE PROXY NAMES VISIBLE - FIX */
+/* WHITE TEXT */
 .grid > div h1,
 .grid > div h2,
 .grid > div h3,
 .grid > div h4 {
-  color: #0f172a !important;
-  font-weight: 700 !important;
-  font-size: 15px !important;
-  opacity: 1 !important;
+  color: white !important;
+  font-weight: 800 !important;
+  font-size: 16px !important;
 }
 .grid > div p,
 .grid > div span,
 .grid > div div {
-  color: #334155 !important;
-  opacity: 1 !important;
+  color: #e2e8f0 !important;
 }
-/* If names were white before */
-.grid > div * {
-  color: #334155;
-}
-.grid > div h1,
-.grid > div h2,
-.grid > div h3 {
-  color: #0f172a !important;
+.grid > div p b {
+  color: white !important;
 }
 
-/* BADGE / PRICE */
+/* BUTTON WHITE */
 .grid > div button {
-  background: #0f172a !important;
-  color: white !important;
+  background: white !important;
+  color: #0f172a !important;
   border-radius: 10px !important;
-  font-weight: 600 !important;
+  font-weight: 800 !important;
 }
 
 @media (max-width: 640px) {
