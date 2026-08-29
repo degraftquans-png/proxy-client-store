@@ -2,30 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 html {
-  font-size: 13px !important;
+  font-size: 13.5px !important;
 }
 body {
-  zoom: 0.9;
+  font-family: 'Inter', sans-serif !important;
+  background: #f8fafc !important;
+  zoom: 0.92;
 }
-.grid {
-  gap: 10px !important;
-}
+
+/* PRO CARD DESIGN */
 .grid > div {
-  padding: 10px !important;
+  background: white !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 16px !important;
+  padding: 16px !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.04) !important;
+  transition: all 0.2s ease !important;
 }
-.grid > div h3 {
-  font-size: 14px !important;
+.grid > div:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.08) !important;
+  border-color: #cbd5e1 !important;
 }
-.grid > div p {
-  font-size: 12px !important;
+
+.grid {
+  gap: 16px !important;
 }
 
 @media (max-width: 640px) {
-  html {
-    font-size: 10px !important;
-  }
-  body {
-    zoom: 0.8;
-  }
+  html { font-size: 11px !important; }
+  body { zoom: 0.85; }
 }
