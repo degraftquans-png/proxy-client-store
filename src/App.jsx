@@ -1,156 +1,132 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 
-const WHATSAPP = "233594682085";
-const waLink = (msg) => `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`;
+const WHATSAPP_NUMBER = "233594682085";
+const PAYSTACK_PUBLIC_KEY = "pk_test_5f501031e23522ce04d75524a9a35f1a69d11445"; // change to pk_live_ when approved
 
 const PRODUCTS = [
-  { id:'9proxy-ips', name:'9Proxy — Residential SOCKS5 IPs', rating:'4.9 • 122', badge:'BEST SELLER', from:'From $0.80', type:'IPs', letter:'9', color:'bg-blue-500', list:[
-    {label:'50 IPs', price:'GHC 100'},{label:'100 IPs', price:'GHC 170'},{label:'200 IPs', price:'GHC 340'},{label:'300 IPs', price:'GHC 480'},{label:'400 IPs', price:'GHC 570'},{label:'500 IPs', price:'GHC 650'},{label:'800 IPs', price:'GHC 850'},{label:'1000 IPs', price:'GHC 1050'},{label:'1200 IPs', price:'GHC 1150'},{label:'1600 IPs', price:'GHC 1350'},
-  ]},
-  { id:'9proxy-gb', name:'9Proxy GB', rating:'4.9 • 51', badge:'FLEXIBLE', from:'From $1.15', type:'GB', letter:'9', color:'bg-blue-600', list:[
-    {label:'2GB', price:'10k'},{label:'5GB', price:'15k'},{label:'10GB', price:'30k'},{label:'15GB', price:'43k'},{label:'20GB', price:'55k'},{label:'25GB', price:'65k'},{label:'30GB', price:'75k'},{label:'35GB', price:'80k'},{label:'50GB', price:'100k'},
-  ]},
-  { id:'711-ips', name:'711Proxy', rating:'4.9 • 44', badge:'CHEAPEST', from:'From $0.65', type:'IPs', letter:'7', color:'bg-white text-black', list:[
-    {label:'25 IPs', price:'40gh'},{label:'50 IPs', price:'75gh'},{label:'100 IPs', price:'140gh'},{label:'200 IPs', price:'250gh'},{label:'300 IPs', price:'380gh'},{label:'400 IPs', price:'450gh'},{label:'500 IPs', price:'500gh'},{label:'2000 IPs', price:'1000gh'},
-  ]},
-  { id:'711-gb', name:'711Proxy GB', rating:'5.0 • 8', badge:'HOT DEAL', from:'From $1.13', type:'GB', letter:'7', color:'bg-white text-black', list:[
-    {label:'2GB', price:'GHC 50'},{label:'5GB', price:'GHC 80'},{label:'10GB', price:'GHC 150'},{label:'15GB', price:'GHC 220'},{label:'20GB', price:'GHC 290'},{label:'25GB', price:'GHC 350'},{label:'30GB', price:'GHC 410'},{label:'40GB', price:'GHC 500'},{label:'100GB', price:'GHC 1000'},{label:'250GB', price:'GHC 1800'},
-  ]},
-  { id:'loki', name:'LokiProxy', rating:'4.9 • 24', badge:'PREMIUM', from:'From $0.60', type:'IPs', letter:'L', color:'bg-emerald-500', list:[
-    {label:'25 IPs', price:'60gh'},{label:'50 IPs', price:'100gh'},{label:'100 IPs', price:'140gh'},{label:'200 IPs', price:'260gh'},{label:'400 IPs', price:'400gh'},{label:'500 IPs', price:'500gh'},{label:'1500 IPs', price:'940gh'},{label:'3000 IPs', price:'1350gh'},
-  ]},
-  { id:'nov', name:'NovProxy', rating:'5.0 • 27', badge:'NEW', from:'From $0.42', type:'IPs', letter:'N', color:'bg-violet-500', list:[
-    {label:'25 IPs', price:'6k'},{label:'50 IPs', price:'10k'},{label:'100 IPs', price:'13k'},{label:'200 IPs', price:'21k'},{label:'300 IPs', price:'32k'},{label:'400 IPs', price:'41k'},{label:'500 IPs', price:'50k'},{label:'1000 IPs', price:'65k'},
-  ]},
+  { id: 1, name: "US Residential Proxy - 1GB", priceGHS: 65, popular: true, desc: "Premium US IP, never blocked" },
+  { id: 2, name: "UK Residential Proxy - 1GB", priceGHS: 70, popular: false, desc: "Clean UK IP for sneaker sites" },
+  { id: 3, name: "Nigeria ISP Proxy - 1GB", priceGHS: 50, popular: true, desc: "Fast NG proxy, low latency" },
+  { id: 4, name: "Ghana Dedicated Proxy", priceGHS: 120, popular: false, desc: "Static IP, unlimited bandwidth" },
+  { id: 5, name: "Data Center Proxy - 10 Pack", priceGHS: 90, popular: true, desc: "Fast & cheap for scraping" },
 ];
 
-const DEFAULT_REVIEWS = [
-  {name:'Kwame A.', loc:'Accra • 9Proxy 100 IPs', text:'Fast delivery on WhatsApp. IPs are clean for sneakers. Will buy again!', stars:5},
-  {name:'Chidi O.', loc:'Lagos • 711Proxy GB 25GB', text:'711Proxy GB is very clean. No ban. Seller is legit. Recommended.', stars:5},
-  {name:'Musa', loc:'Kumasi • LokiProxy 500 IPs', text:'Best store. Got replacement when 2 IPs died. 0594682085 is active!', stars:5},
-  {name:'Sarah J.', loc:'Tema • 711Proxy 200 IPs', text:'Cheapest in Ghana. 200 IPs for 250gh is insane. Works for my work.', stars:5},
-];
+const EXCHANGE_RATE = 95; // 1 GHS = ~95 NGN - you can edit this
 
-export default function App(){
-  const [filter, setFilter] = useState('all');
-  const [reviews, setReviews] = useState(DEFAULT_REVIEWS);
-  const [showForm, setShowForm] = useState(false);
-  const [newR, setNewR] = useState({name:'', loc:'', text:''});
-  const [recent, setRecent] = useState(null);
-  const [showPromo, setShowPromo] = useState(true);
+export default function App() {
+  const [search, setSearch] = useState("");
+  const [currency, setCurrency] = useState("GHS"); // GHS or NGN
 
-  useEffect(()=>{
-    const saved = localStorage.getItem('proxy_reviews_gh');
-    if(saved) setReviews(JSON.parse(saved));
-  },[]);
+  const filteredProducts = useMemo(() => {
+    return PRODUCTS.filter(p =>
+      p.name.toLowerCase().includes(search.toLowerCase()) ||
+      p.desc.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [search]);
 
-  // Live recent buyer popup
-  useEffect(()=>{
-    const names = ['Someone from Accra','Chidi from Lagos','Kwesi from Kumasi','Ama from Tema','Tunde from Abuja'];
-    const items = ['711Proxy 25 IPs','9Proxy GB 10GB','LokiProxy 100 IPs','NovProxy 500 IPs','711Proxy GB 5GB'];
-    const iv = setInterval(()=>{
-      setRecent({who:names[Math.floor(Math.random()*names.length)], what:items[Math.floor(Math.random()*items.length)]});
-      setTimeout(()=>setRecent(null), 4000);
-    }, 8000);
-    return()=>clearInterval(iv);
-  },[]);
-
-  const addReview = ()=>{
-    if(!newR.name ||!newR.text) return alert('Fill name and review');
-    const updated = [{...newR, stars:5, loc: newR.loc || 'Ghana'},...reviews];
-    setReviews(updated);
-    localStorage.setItem('proxy_reviews_gh', JSON.stringify(updated));
-    setNewR({name:'', loc:'', text:''});
-    setShowForm(false);
+  const formatPrice = (priceGHS) => {
+    if (currency === "GHS") return `₵${priceGHS}`;
+    return `₦${(priceGHS * EXCHANGE_RATE).toLocaleString()}`;
   };
 
-  const filtered = filter==='all'? PRODUCTS : PRODUCTS.filter(p=>p.type===filter);
+  const handleBuy = (product) => {
+    const message = `Hi ProxyGet, I want to buy: ${product.name} - ${formatPrice(product.priceGHS)}`;
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
+  };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0F] text-white">
-      {showPromo && <div className="bg-[#25D366] text-black text-center py-2 text-xs font-black flex justify-center gap-4 px-4">🔥 TODAY: Extra 10% Bonus on 500+ IPs • WhatsApp: 0594682085 <button onClick={()=>setShowPromo(false)} className="ml-4">✕</button></div>}
+    <div className="min-h-screen bg-[#0a0a0a] text-white font-sans">
+      {/* HEADER - Green bar removed */}
+      <header className="sticky top-0 z-40 bg-[#111] border-b border-white/10 px-4 md:px-8 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center font-black text-black">P</div>
+          <h1 className="text-xl md:text-2xl font-black tracking-tight">ProxyGet</h1>
+        </div>
 
-      <header className="sticky top-0 z-40 bg-[#0A0A0F]/80 backdrop-blur-xl border-b border-white/10">
-        <div className="max-w-[1280px] mx-auto px-6 h-[64px] flex justify-between items-center">
-          <div className="font-black flex items-center gap-2"><div className="w-8 h-8 bg-white text-black rounded-lg grid place-items-center">P</div> ProxyUniverse GH</div>
-          <a href={waLink('Hi, I want to buy proxy')} className="bg-white text-black px-5 py-2.5 rounded-full text-sm font-bold">WhatsApp: (+233) 0594682085</a>
+        {/* Search Bar + Currency Switch */}
+        <div className="flex items-center gap-3 md:gap-6">
+          <div className="relative hidden md:block">
+            <input
+              type="text"
+              placeholder="Search proxies..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="bg-[#1a1a1a] border border-white/10 rounded-full px-4 py-2 pl-10 w-[260px] focus:outline-none focus:border-green-500 text-sm"
+            />
+            <span className="absolute left-3 top-2.5 text-white/40">🔍</span>
+          </div>
+
+          {/* GHS / NGN Switch */}
+          <div className="bg-[#1a1a1a] border border-white/10 rounded-full p-1 flex text-sm font-bold">
+            <button
+              onClick={() => setCurrency("GHS")}
+              className={`px-4 py-1.5 rounded-full transition ${currency === "GHS"? "bg-white text-black" : "text-white/60"}`}
+            >
+              GHS
+            </button>
+            <button
+              onClick={() => setCurrency("NGN")}
+              className={`px-4 py-1.5 rounded-full transition ${currency === "NGN"? "bg-white text-black" : "text-white/60"}`}
+            >
+              NGN
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* CATALOG - like screenshot 2 */}
-      <section className="max-w-[1280px] mx-auto px-6 pt-10">
-        <div className="flex gap-2 mb-6">
-          <button onClick={()=>setFilter('all')} className={`px-4 py-2 rounded-full text-xs font-bold border ${filter==='all'?'bg-white text-black':'bg-white/10 border-white/10'}`}>Catalog</button>
-          <button onClick={()=>setFilter('IPs')} className={`px-4 py-2 rounded-full text-xs font-bold border ${filter==='IPs'?'bg-white text-black':'bg-white/10 border-white/10'}`}>IPs</button>
-          <button onClick={()=>setFilter('GB')} className={`px-4 py-2 rounded-full text-xs font-bold border ${filter==='GB'?'bg-white text-black':'bg-white/10 border-white/10'}`}>GB</button>
-          <span className="ml-auto text-xs text-white/40">⭐ 4.9/5 • 60k+ customers</span>
+      {/* Mobile Search */}
+      <div className="md:hidden px-4 py-3 bg-[#111] border-b border-white/10">
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search proxies..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full bg-[#1a1a1a] border border-white/10 rounded-full px-4 py-3 pl-10 focus:outline-none focus:border-green-500"
+          />
+          <span className="absolute left-3 top-3.5 text-white/40">🔍</span>
         </div>
+      </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map(p=>(
-            <div key={p.id} className="bg-[#15151E] border border-white/10 rounded-[20px] p-5">
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-xl ${p.color} grid place-items-center font-black`}>{p.letter}</div>
-                <div className="flex-1"><div className="font-bold text-sm leading-tight">{p.name}</div><div className="text-[11px] text-yellow-400">⭐ {p.rating}</div></div>
-                <div className="text-right"><div className="text-[10px] bg-white text-black px-2 py-1 rounded-full font-black">{p.badge}</div><div className="text-[11px] text-white/40 mt-1">{p.from}</div></div>
-              </div>
-              <div className="mt-4 bg-[#0A0A0F] rounded-xl divide-y divide-white/5 border border-white/5">
-                {p.list.map(i=>(
-                  <div key={i.label} className="flex justify-between items-center px-3 py-2.5 text-[13px]">
-                    <span>{i.label}</span>
-                    <span className="flex items-center gap-2"><b>{i.price}</b><a href={waLink(`Hello, I want ${p.name} - ${i.label} for ${i.price}`)} className="bg-white text-black px-3 py-1 rounded-full text-[11px] font-black">Buy</a></span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
+      {/* HERO */}
+      <section className="px-4 md:px-8 py-10 md:py-16 text-center">
+        <h2 className="text-4xl md:text-6xl font-black leading-tight">
+          Fast & Anonymous <br/><span className="text-green-500">Proxies</span> for Ghana & Nigeria
+        </h2>
+        <p className="text-white/60 mt-4 max-w-xl mx-auto">Residential, ISP and Datacenter proxies. Instant delivery via WhatsApp after payment.</p>
       </section>
 
-      {/* LIVE REVIEWS + RATINGS - RESTORED */}
-      <section className="max-w-[1280px] mx-auto px-6 py-16">
-        <div className="flex flex-wrap justify-between items-end gap-4 mb-6">
-          <div>
-            <h2 className="text-[28px] font-black">Live Customer Reviews</h2>
-            <div className="flex items-center gap-2 mt-2">
-              <div className="flex text-yellow-400 text-sm">★★★★★</div>
-              <span className="text-sm font-bold">4.9/5</span>
-              <span className="text-xs text-white/50">• {reviews.length} verified purchases • updates live</span>
-              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+      {/* PRODUCTS */}
+      <section className="px-4 md:px-8 pb-32 grid grid-cols-1 md:grid-cols-3 gap-4 max-w-6xl mx-auto">
+        {filteredProducts.length === 0? (
+          <p className="col-span-3 text-center text-white/40 py-10">No proxy found for "{search}"</p>
+        ) : filteredProducts.map(product => (
+          <div key={product.id} className="bg-[#161616] border border-white/10 rounded-2xl p-5 hover:border-green-500/50 transition relative">
+            {product.popular && <span className="absolute top-3 right-3 bg-green-500 text-black text-[10px] font-black px-2 py-1 rounded-full">POPULAR</span>}
+            <h3 className="font-bold text-lg pr-16">{product.name}</h3>
+            <p className="text-white/50 text-sm mt-1 h-10">{product.desc}</p>
+            <div className="mt-5 flex items-center justify-between">
+              <span className="text-2xl font-black">{formatPrice(product.priceGHS)}</span>
+              <button onClick={() => handleBuy(product)} className="bg-white text-black px-5 py-2.5 rounded-full font-bold text-sm hover:bg-green-500 transition">
+                Buy Now
+              </button>
             </div>
           </div>
-          <button onClick={()=>setShowForm(!showForm)} className="bg-white text-black px-5 py-2.5 rounded-full text-sm font-bold">+ Add Review</button>
-        </div>
-
-        {showForm && (
-          <div className="bg-[#15151E] border border-[#25D366]/30 rounded-2xl p-5 mb-6 max-w-xl">
-            <h3 className="font-bold text-sm mb-3">Add your review (shows instantly)</h3>
-            <input value={newR.name} onChange={e=>setNewR({...newR, name:e.target.value})} placeholder="Your Name" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm mb-2 outline-none"/>
-            <input value={newR.loc} onChange={e=>setNewR({...newR, loc:e.target.value})} placeholder="Location + Product (e.g Accra - 711Proxy 50 IPs)" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm mb-2 outline-none"/>
-            <textarea value={newR.text} onChange={e=>setNewR({...newR, text:e.target.value})} placeholder="Your experience..." className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm h-20 outline-none mb-3"></textarea>
-            <button onClick={addReview} className="w-full bg-[#25D366] text-black py-3 rounded-full font-black text-sm">Post Review ★★★★★</button>
-          </div>
-        )}
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
-          {reviews.map((r,i)=>(
-            <div key={i} className="bg-[#15151E] border border-white/10 rounded-2xl p-4">
-              <div className="flex text-yellow-400 text-xs">★★★★★</div>
-              <p className="text-[13px] leading-relaxed mt-2">"{r.text}"</p>
-              <p className="text-[11px] text-white/40 mt-3">— {r.name}, {r.loc}</p>
-            </div>
-          ))}
-        </div>
+        ))}
       </section>
 
-      <footer className="border-t border-white/10 py-10 text-center">
-        <div className="text-sm font-bold">WhatsApp Contact: (+233) 0594682085</div>
-        <div className="text-xs text-white/30 mt-2">Instant delivery • 24/7 • Ghana & Nigeria</div>
-      </footer>
-
-      {/* FLOATING WHATSAPP + RECENT BUYER */}
-      <a href={waLink('Hi, I want to buy proxies')} className="fixed bottom-5 right-5 w-14 h-14 bg-[#25D366] rounded-full grid place-items-center text-2xl shadow-xl">💬</a>
-      {recent && <div className="fixed bottom-24 left-4 bg-white text-black rounded-2xl px-4 py-3 text-xs shadow-2xl animate-bounce"><b>{recent.who}</b> bought<br/>{recent.what} <span className="text-[10px] opacity-60">2 mins ago • verified</span></div>}
+      {/* FLOATING WHATSAPP BUTTON */}
+      <a
+        href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi ProxyGet, I need help with proxies")}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 w-14 h-14 bg-[#25D366] rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(37,211,102,0.5)] hover:scale-110 transition z-50"
+      >
+        {/* WhatsApp SVG Icon */}
+        <svg viewBox="0 0 24 24" className="w-8 h-8 fill-white">
+          <path d="M19.05 4.91A9.9 9.9 0 0 0 12.03 2C6.16 2 1.39 6.77 1.39 12.65c0 1.87.49 3.7 1.42 5.31L1 22l4.18-1.1a9.88 9.88 0 0 0 4.85 1.23h.01c5.87 0 10.64-4.77 10.64-10.65 0-2.84-1.11-5.52-3.13-7.53l.5-.09zM12.04 20.2h-.01a8.14 8.14 0 0 1-4.15-1.14l-.3-.18-2.48.65.66-2.42-.19-.32a8.2 8.2 0 0 1-1.26-4.35c0-4.54 3.7-8.24 8.25-8.24 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 0 1 2.41 5.82c0 4.54-3.7 8.24-8.25 8.24zm4.52-6.17c-.25-.12-1.47-.73-1.7-.81-.23-.09-.39-.12-.56.12-.17.25-.65.81-.8.97-.15.17-.3.19-.55.06-.25-.12-1.05-.39-2-1.24-.74-.66-1.24-1.47-1.38-1.72-.14-.25-.02-.38.1-.51.1-.1.25-.3.37-.45.12-.15.16-.25.25-.42.08-.17.04-.31-.02-.43-.06-.12-.56-1.35-.77-1.85-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.22.25-.86.84-.86 2.05s.88 2.38 1 2.55c.12.17 1.73 2.64 4.2 3.7.59.25 1.05.4 1.41.51.59.19 1.13.16 1.55.1.47-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.1-.23-.16-.48-.28z"/>
+        </svg>
+      </a>
     </div>
-  )
+  );
 }
