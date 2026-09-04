@@ -5,7 +5,6 @@ const PAYSTACK_PUBLIC_KEY = "pk_test_5f501031e23522ce04d75524a9a35f1a69d11445";
 const NGN_TO_GHS_RATE = 95;
 
 const ALL_PRODUCTS = [
-  // NovProxy - 8 - EXACT
   { id: "nov-25", cat: "NovProxy", name: "NovProxy - 25 IPs", price: 6000, currency: "NGN", popular: false },
   { id: "nov-50", cat: "NovProxy", name: "NovProxy - 50 IPs", price: 10000, currency: "NGN", popular: false },
   { id: "nov-100", cat: "NovProxy", name: "NovProxy - 100 IPs", price: 13000, currency: "NGN", popular: true },
@@ -15,7 +14,6 @@ const ALL_PRODUCTS = [
   { id: "nov-500", cat: "NovProxy", name: "NovProxy - 500 IPs", price: 50000, currency: "NGN", popular: true },
   { id: "nov-1000", cat: "NovProxy", name: "NovProxy - 1000 IPs", price: 65000, currency: "NGN", popular: true },
 
-  // 711Proxy - 8 - EXACT
   { id: "711ip-25", cat: "711Proxy", name: "711Proxy - 25 IPs", price: 40, currency: "GHS", popular: false },
   { id: "711ip-50", cat: "711Proxy", name: "711Proxy - 50 IPs", price: 75, currency: "GHS", popular: false },
   { id: "711ip-100", cat: "711Proxy", name: "711Proxy - 100 IPs", price: 140, currency: "GHS", popular: true },
@@ -25,7 +23,6 @@ const ALL_PRODUCTS = [
   { id: "711ip-500", cat: "711Proxy", name: "711Proxy - 500 IPs", price: 500, currency: "GHS", popular: true },
   { id: "711ip-2000", cat: "711Proxy", name: "711Proxy - 2000 IPs", price: 1000, currency: "GHS", popular: true },
 
-  // 711Proxy GB - 10 - EXACT
   { id: "711gb-2", cat: "711Proxy GB", name: "711Proxy GB - 2GB", price: 50, currency: "GHS", popular: false },
   { id: "711gb-5", cat: "711Proxy GB", name: "711Proxy GB - 5GB", price: 80, currency: "GHS", popular: false },
   { id: "711gb-10", cat: "711Proxy GB", name: "711Proxy GB - 10GB", price: 150, currency: "GHS", popular: true },
@@ -37,7 +34,6 @@ const ALL_PRODUCTS = [
   { id: "711gb-100", cat: "711Proxy GB", name: "711Proxy GB - 100GB", price: 1000, currency: "GHS", popular: true },
   { id: "711gb-250", cat: "711Proxy GB", name: "711Proxy GB - 250GB", price: 1800, currency: "GHS", popular: true },
 
-  // 9Proxy GB - 10 - EXACT
   { id: "9gb-1", cat: "9Proxy GB", name: "9Proxy GB - 1GB", price: 6000, currency: "NGN", popular: false },
   { id: "9gb-2", cat: "9Proxy GB", name: "9Proxy GB - 2GB", price: 10000, currency: "NGN", popular: false },
   { id: "9gb-5", cat: "9Proxy GB", name: "9Proxy GB - 5GB", price: 15000, currency: "NGN", popular: false },
@@ -49,7 +45,6 @@ const ALL_PRODUCTS = [
   { id: "9gb-35", cat: "9Proxy GB", name: "9Proxy GB - 35GB", price: 80000, currency: "NGN", popular: false },
   { id: "9gb-50", cat: "9Proxy GB", name: "9Proxy GB - 50GB", price: 100000, currency: "NGN", popular: true },
 
-  // LokiProxy - 8 - EXACT
   { id: "loki-25", cat: "LokiProxy", name: "LokiProxy - 25 IPs", price: 60, currency: "GHS", popular: false },
   { id: "loki-50", cat: "LokiProxy", name: "LokiProxy - 50 IPs", price: 100, currency: "GHS", popular: false },
   { id: "loki-100", cat: "LokiProxy", name: "LokiProxy - 100 IPs", price: 140, currency: "GHS", popular: true },
@@ -59,20 +54,25 @@ const ALL_PRODUCTS = [
   { id: "loki-1500", cat: "LokiProxy", name: "LokiProxy - 1500 IPs", price: 940, currency: "GHS", popular: false },
   { id: "loki-3000", cat: "LokiProxy", name: "LokiProxy - 3000 IPs", price: 1350, currency: "GHS", popular: true },
 
-  // 9Proxy - 11 - CORRECTED FINAL - 5 IPs = GHC 60 + exact from your latest picture
-  { id: "9ip-5", cat: "9Proxy", name: "9Proxy - 5 IPs", price: 60, currency: "GHS", popular: true },
-  { id: "9ip-50", cat: "9Proxy", name: "9Proxy - 50 IPs", price: 100, currency: "GHS", popular: false },
-  { id: "9ip-100", cat: "9Proxy", name: "9Proxy - 100 IPs", price: 170, currency: "GHS", popular: true },
-  { id: "9ip-200", cat: "9Proxy", name: "9Proxy - 200 IPs", price: 340, currency: "GHS", popular: true },
-  { id: "9ip-300", cat: "9Proxy", name: "9Proxy - 300 IPs", price: 480, currency: "GHS", popular: false },
-  { id: "9ip-400", cat: "9Proxy", name: "9Proxy - 400 IPs", price: 570, currency: "GHS", popular: false },
-  { id: "9ip-500", cat: "9Proxy", name: "9Proxy - 500 IPs", price: 650, currency: "GHS", popular: true },
-  { id: "9ip-800", cat: "9Proxy", name: "9Proxy - 800 IPs", price: 850, currency: "GHS", popular: true },
-  { id: "9ip-1000", cat: "9Proxy", name: "9Proxy - 1000 IPs", price: 1050, currency: "GHS", popular: true },
-  { id: "9ip-1200", cat: "9Proxy", name: "9Proxy - 1200 IPs", price: 1150, currency: "GHS", popular: false },
-  { id: "9ip-1600", cat: "9Proxy", name: "9Proxy - 1600 IPs", price: 1350, currency: "GHS", popular: true },
+  { id: "9ip-5-ghs", cat: "9Proxy", name: "9Proxy - 5 IPs", price: 60, currency: "GHS", popular: true },
+  { id: "9ip-50-ghs", cat: "9Proxy", name: "9Proxy - 50 IPs", price: 100, currency: "GHS", popular: false },
+  { id: "9ip-100-ghs", cat: "9Proxy", name: "9Proxy - 100 IPs", price: 170, currency: "GHS", popular: true },
+  { id: "9ip-200-ghs", cat: "9Proxy", name: "9Proxy - 200 IPs", price: 340, currency: "GHS", popular: true },
+  { id: "9ip-300-ghs", cat: "9Proxy", name: "9Proxy - 300 IPs", price: 480, currency: "GHS", popular: false },
+  { id: "9ip-400-ghs", cat: "9Proxy", name: "9Proxy - 400 IPs", price: 570, currency: "GHS", popular: false },
+  { id: "9ip-500-ghs", cat: "9Proxy", name: "9Proxy - 500 IPs", price: 650, currency: "GHS", popular: true },
+  { id: "9ip-800-ghs", cat: "9Proxy", name: "9Proxy - 800 IPs", price: 850, currency: "GHS", popular: true },
+  { id: "9ip-1000-ghs", cat: "9Proxy", name: "9Proxy - 1000 IPs", price: 1050, currency: "GHS", popular: true },
+  { id: "9ip-1200-ghs", cat: "9Proxy", name: "9Proxy - 1200 IPs", price: 1150, currency: "GHS", popular: false },
+  { id: "9ip-1600-ghs", cat: "9Proxy", name: "9Proxy - 1600 IPs", price: 1350, currency: "GHS", popular: true },
+  { id: "9ip-25-ngn", cat: "9Proxy", name: "9Proxy - 25 IPs", price: 10000, currency: "NGN", popular: true },
+  { id: "9ip-50-ngn", cat: "9Proxy", name: "9Proxy - 50 IPs", price: 14000, currency: "NGN", popular: false },
+  { id: "9ip-100-ngn", cat: "9Proxy", name: "9Proxy - 100 IPs", price: 23000, currency: "NGN", popular: true },
+  { id: "9ip-200-ngn", cat: "9Proxy", name: "9Proxy - 200 IPs", price: 43000, currency: "NGN", popular: true },
+  { id: "9ip-300-ngn", cat: "9Proxy", name: "9Proxy - 300 IPs", price: 54000, currency: "NGN", popular: false },
+  { id: "9ip-400-ngn", cat: "9Proxy", name: "9Proxy - 400 IPs", price: 64000, currency: "NGN", popular: false },
+  { id: "9ip-800-ngn", cat: "9Proxy", name: "9Proxy - 800 IPs", price: 100000, currency: "NGN", popular: true },
 
-  // Swift Proxy - 6 - RESTORED
   { id: "swift-25", cat: "Swift Proxy", name: "Swift Proxy - 25 IPs", price: 60, currency: "GHS", popular: false },
   { id: "swift-50", cat: "Swift Proxy", name: "Swift Proxy - 50 IPs", price: 110, currency: "GHS", popular: false },
   { id: "swift-100", cat: "Swift Proxy", name: "Swift Proxy - 100 IPs", price: 160, currency: "GHS", popular: true },
@@ -80,7 +80,6 @@ const ALL_PRODUCTS = [
   { id: "swift-500", cat: "Swift Proxy", name: "Swift Proxy - 500 IPs", price: 550, currency: "GHS", popular: true },
   { id: "swift-1000", cat: "Swift Proxy", name: "Swift Proxy - 1000 IPs", price: 950, currency: "GHS", popular: true },
 
-  // Vless VPN Premium - 1 - RESTORED
   { id: "vless-free", cat: "Vless VPN", name: "Vless VPN Premium - Free", price: 0, currency: "GHS", popular: true },
 ];
 
