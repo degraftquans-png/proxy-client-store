@@ -54,6 +54,7 @@ const ALL_PRODUCTS = [
   { id: "loki-1500", cat: "LokiProxy", name: "LokiProxy - 1500 IPs", price: 940, currency: "GHS", popular: false },
   { id: "loki-3000", cat: "LokiProxy", name: "LokiProxy - 3000 IPs", price: 1350, currency: "GHS", popular: true },
 
+  // 9Proxy - 18 - NO DOUBLES NOW - filtered by currency
   { id: "9ip-5-ghs", cat: "9Proxy", name: "9Proxy - 5 IPs", price: 60, currency: "GHS", popular: true },
   { id: "9ip-50-ghs", cat: "9Proxy", name: "9Proxy - 50 IPs", price: 100, currency: "GHS", popular: false },
   { id: "9ip-100-ghs", cat: "9Proxy", name: "9Proxy - 100 IPs", price: 170, currency: "GHS", popular: true },
@@ -129,10 +130,40 @@ export default function App() {
   useEffect(() => { const s = document.createElement("script"); s.src = "https://js.paystack.co/v1/inline.js"; s.async=true; document.body.appendChild(s); const saved = localStorage.getItem("proxyget_reviews"); if(saved) setReviews(JSON.parse(saved)); }, []);
   const saveReviews = (r) => { setReviews(r); localStorage.setItem("proxyget_reviews", JSON.stringify(r)); };
   const handleAddReview = () => { if(!newReview.name ||!newReview.text){ alert("Fill name and review"); return; } const r = { name: newReview.name, text: newReview.text, stars: newReview.stars, product: newReview.product, location: "Verified Buyer" }; saveReviews([r,...reviews]); setNewReview({ name:"", text:"", stars:5, product:"711Proxy GB - 10GB" }); setShowAdd(false); };
-  const filtered = useMemo(() => ALL_PRODUCTS.filter(p => { const matchCat = activeCat === "All" || p.cat === activeCat; const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.cat.toLowerCase().includes(search.toLowerCase()); return matchCat && matchSearch; }), [search, activeCat]);
+
+  // FIXED - NO MORE DOUBLES - filter by selected currency
+  const filtered = useMemo(() => ALL_PRODUCTS.filter(p => {
+    const matchCat = activeCat === "All" || p.cat === activeCat;
+    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.cat.toLowerCase().includes(search.toLowerCase());
+    const matchCurrency = p.price === 0 || p.currency === currency;
+    return matchCat && matchSearch && matchCurrency;
+  }), [search, activeCat, currency]);
+
   const displayProducts = search.length > 1? filtered : filtered.filter(p=>p.popular).slice(0,8);
-  const getPrice = (product) => { if(product.price===0) return "FREE"; if (product.currency === currency) return currency === "GHS"? `GHC ${product.price}` : `₦${product.price.toLocaleString()}`; if (currency === "GHS") return `GHC ${Math.ceil(product.price / NGN_TO_GHS_RATE)}`; return `₦${Math.ceil(product.price * NGN_TO_GHS_RATE).toLocaleString()}`; };
-  const handlePay = (product) => { if(product.price===0){ window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hi ProxyGet! I want Vless VPN Premium Free. My email: ${email}`)}`; return; } if (!email.includes("@")){ alert("Enter email first"); return; } const amountGHS = product.currency === "GHS"? product.price : Math.ceil(product.price / NGN_TO_GHS_RATE); if (!window.PaystackPop){ alert("Wait 2s"); return; } const handler = window.PaystackPop.setup({ key: PAYSTACK_PUBLIC_KEY, email, amount: amountGHS*100, currency: "GHS", ref: `ProxyGet_${Date.now()}`, callback: function(res){ window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hi ProxyGet! Paid for ${product.name} ${getPrice(product)} Ref:${res.reference} Email:${email}`)}`; } }); handler.openIframe(); };
+
+  const getPrice = (product) => {
+    if(product.price===0) return "FREE";
+    return product.currency === "GHS"? `GHC ${product.price}` : `₦${product.price.toLocaleString()}`;
+  };
+
+  const handlePay = (product) => {
+    if(product.price===0){
+      window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hi ProxyGet! I want Vless VPN Premium Free. My email: ${email}`)}`;
+      return;
+    }
+    if (!email.includes("@")){ alert("Enter email first"); return; }
+    const amountGHS = product.currency === "GHS"? product.price : Math.ceil(product.price / NGN_TO_GHS_RATE);
+    if (!window.PaystackPop){ alert("Wait 2s"); return; }
+    const handler = window.PaystackPop.setup({
+      key: PAYSTACK_PUBLIC_KEY, email, amount: amountGHS*100, currency: "GHS",
+      ref: `ProxyGet_${Date.now()}`,
+      callback: function(res){
+        window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hi ProxyGet! Paid for ${product.name} ${getPrice(product)} Ref:${res.reference} Email:${email}`)}`;
+      }
+    });
+    handler.openIframe();
+  };
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
       <LivePurchasePopup /><LiveReviewPopup reviews={reviews} />
@@ -141,7 +172,7 @@ export default function App() {
       <section className="px-4 md:px-8 py-10 text-center max-w-4xl mx-auto"><h2 className="text-4xl md:text-6xl font-black">Fast & Anonymous <span className="text-green-500">Proxies</span></h2><div className="mt-6 max-w-xl mx-auto flex flex-col gap-3"><div className="relative"><span className="absolute left-4 top-3.5">🔍</span><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search e.g. 100 IPs, 10GB, Swift, Vless..." className="w-full bg-[#1a1a1a] border border-white/10 rounded-full pl-11 pr-4 py-3.5 focus:border-green-500 outline-none" /></div><input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="your@email.com for receipt" className="w-full bg-[#1a1a1a] border border-white/10 rounded-full px-6 py-3 text-center text-sm outline-none focus:border-green-500" />{search && <p className="text-xs text-white/40">{filtered.length} results for "{search}" - <button onClick={()=>setSearch("")} className="text-green-500">clear</button></p>}</div></section>
       <div className="px-4 md:px-8 flex gap-2 overflow-x-auto pb-4 max-w-6xl mx-auto"><span className="text-xs text-white/30 py-2">Filter:</span>{CATEGORIES.map(c=><button key={c} onClick={()=>setActiveCat(c)} className={`whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold border ${activeCat===c?"bg-white text-black":"bg-[#1a1a1a] text-white/60 border-white/10"}`}>{c}</button>)}</div>
       <section className="px-4 md:px-8 pb-10 grid grid-cols-1 md:grid-cols-4 gap-4 max-w-6xl mx-auto">{displayProducts.map(p=><div key={p.id} className="bg-[#161616] border border-white/10 rounded-2xl p-5"><div className="text-[10px] text-white/40 font-bold">{p.cat}</div><h3 className="font-bold text-sm mt-1">{p.name}</h3><div className="mt-4 flex justify-between items-center"><span className="font-black text-xl">{getPrice(p)}</span><button onClick={()=>handlePay(p)} className={`px-5 py-2 rounded-full font-bold text-sm ${p.price===0?"bg-green-500 text-black":"bg-white text-black hover:bg-green-500"}`}>{p.price===0?"Get Free":"Pay Now"}</button></div></div>)}</section>
-      {search.length===0 && <div className="text-center pb-4 text-white/30 text-xs">Showing 8 popular only. Search to see all {ALL_PRODUCTS.length} products.</div>}
+      {search.length===0 && <div className="text-center pb-4 text-white/30 text-xs">Showing {displayProducts.length} popular for {currency} only. Search to see all.</div>}
       <section className="px-4 md:px-8 py-16 bg-[#111] border-t border-white/5"><div className="max-w-6xl mx-auto"><div className="flex flex-col md:flex-row justify-between items-center gap-4"><div><h3 className="text-2xl font-black">Customer Reviews ⭐⭐⭐⭐⭐</h3><p className="text-white/50 text-sm">Live reviews • {reviews.length} verified</p></div><button onClick={()=>setShowAdd(!showAdd)} className="bg-green-500 text-black px-6 py-2.5 rounded-full font-black text-sm hover:bg-white">{showAdd?"Cancel":" + Add Review"}</button></div>
       {showAdd && (<div className="mt-6 bg-[#161616] border border-green-500/30 rounded-2xl p-6 max-w-2xl mx-auto"><h4 className="font-bold mb-4">Add Your Review</h4><div className="grid gap-3"><input value={newReview.name} onChange={e=>setNewReview({...newReview,name:e.target.value})} placeholder="Your Name" className="bg-[#0a0a0a] border border-white/10 rounded-full px-4 py-3 text-sm outline-none focus:border-green-500" /><select value={newReview.product} onChange={e=>setNewReview({...newReview,product:e.target.value})} className="bg-[#0a0a0a] border border-white/10 rounded-full px-4 py-3 text-sm outline-none">{ALL_PRODUCTS.slice(0,15).map(pr=><option key={pr.id}>{pr.name}</option>)}</select><div className="flex gap-2 items-center"><span className="text-sm">Rating:</span>{[1,2,3,4,5].map(s=><button key={s} onClick={()=>setNewReview({...newReview,stars:s})} className={`text-xl ${s<=newReview.stars?"text-yellow-400":"text-white/20"}`}>★</button>)}</div><textarea value={newReview.text} onChange={e=>setNewReview({...newReview,text:e.target.value})} placeholder="Write your review..." rows={3} className="bg-[#0a0a0a] border border-white/10 rounded-2xl px-4 py-3 text-sm outline-none focus:border-green-500"></textarea><button onClick={handleAddReview} className="bg-white text-black py-3 rounded-full font-black hover:bg-green-500">Submit Review</button></div></div>)}
       <div className="grid md:grid-cols-3 gap-4 mt-8">{reviews.map((r,i)=><div key={i} className="bg-[#161616] border border-white/10 rounded-2xl p-5"><div className="flex justify-between"><span className="text-yellow-400 text-sm">{"★".repeat(r.stars)}</span><span className="text-[10px] text-white/40">{r.location}</span></div><p className="text-sm mt-3 text-white/80">"{r.text}"</p><p className="text-xs mt-3 font-bold text-white/60">— {r.name} • {r.product}</p></div>)}</div></div></section>
